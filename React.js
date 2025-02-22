@@ -1,62 +1,99 @@
 import React, { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { useEffect } from "react";
 
-const handleProcess = async () => {
-  setLoading(true);
-  try {
-    const response = await fetch("http://localhost:5000/process", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ inputText }),
-    });
+const App = () => {
+  const [inputText, setInputText] = useState("");
+  const [processedText, setProcessedText] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [file, setFile] = useState(null);
+  const [extractedText, setExtractedText] = useState("");
 
-    const data = await response.json();
-    setProcessedText(data.processedText);
+  // Handle AI text processing
+  const handleProcess = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch("http://localhost:5000/process", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ inputText }),
+      });
 
-    // Fetch updated history
-    fetchHistory();
-  } catch (error) {
-    console.error("Error processing text:", error);
-  }
-  setLoading(false);
-};
+      const data = await response.json();
+      setProcessedText(data.processedText);
+    } catch (error) {
+      console.error("Error processing text:", error);
+    }
+    setLoading(false);
+  };
 
-// Fetch history from the database
-const fetchHistory = async () => {
-  try {
-    const response = await fetch("http://localhost:5000/history");
-    const data = await response.json();
-    console.log("History:", data);
-  } catch (error) {
-    console.error("Error fetching history:", error);
-  }
-};
+  // Handle File Upload & OCR Processing
+  const handleFileChange = (e) => {
+    setFile(e.target.files[0]);
+  };
+
+  const handleUpload = async () => {
+    if (!file) return alert("Please select a file");
+
+    setLoading(true);
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const response = await fetch("http://localhost:5002/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+      setExtractedText(data.extractedText || "No text found");
+    } catch (error) {
+      console.error("OCR Error:", error);
+    }
+    setLoading(false);
+  };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-gray-100">
-      <Card className="w-full max-w-lg p-6 shadow-lg">
-        <h1 className="text-xl font-bold mb-4">Intelligent Process Automation</h1>
-        <Textarea
+      <div className="w-full max-w-lg p-6 shadow-lg bg-white rounded-md">
+        <h1 className="text-xl font-bold mb-4">Intelligent Automation System</h1>
+
+        {/* AI Text Processing */}
+        <textarea
           placeholder="Enter text for processing..."
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
-          className="mb-4"
+          className="mb-4 w-full p-2 border rounded-md"
         />
-        <Button onClick={handleProcess} disabled={loading}>
+        <button
+          onClick={handleProcess}
+          disabled={loading}
+          className="p-2 w-full bg-blue-500 text-white rounded-md"
+        >
           {loading ? "Processing..." : "Automate"}
-        </Button>
+        </button>
         {processedText && (
-          <CardContent className="mt-4 p-3 bg-gray-200 rounded-md">
-            {processedText}
-          </CardContent>
+          <div className="mt-4 p-3 bg-gray-200 rounded-md">
+            <p>{processedText}</p>
+          </div>
         )}
-      </Card>
+
+        {/* OCR & Document Processing */}
+        <h2 className="text-lg font-semibold mt-6 mb-2">OCR & Document Processing</h2>
+        <input type="file" onChange={handleFileChange} className="mb-4" />
+        <button
+          onClick={handleUpload}
+          disabled={loading}
+          className="p-2 w-full bg-green-500 text-white rounded-md"
+        >
+          {loading ? "Extracting..." : "Upload & Extract"}
+        </button>
+        {extractedText && (
+          <div className="mt-4 p-3 bg-gray-200 rounded-md">
+            <p>{extractedText}</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
 
-export default AutomationApp;
+export default App;
