@@ -1,11 +1,10 @@
 import pytest
-from framework.text_processor import TextProcessor
+from framework.ocr_processor import OCRProcessor
 
 @pytest.fixture
-def text_processor():
-    return TextProcessor()
+def ocr_processor():
+    return OCRProcessor()
 
-def test_text_processing(text_processor):
-    input_text = "hello world"
-    response = text_processor.send_text(input_text)
-    assert response == "Automated Output: HELLO WORLD", "Incorrect AI processing!"
+def test_ocr_processing(ocr_processor):
+    extracted_text = ocr_processor.process_document("test_files/sample_image.png")
+    assert len(extracted_text) > 0, "OCR did not extract text!"
