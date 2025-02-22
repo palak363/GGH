@@ -10,10 +10,10 @@ const AutomationApp = () => {
   const [processedText, setProcessedText] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleProcess = async () => {
+const handleProcess = async () => {
   setLoading(true);
   try {
-    const response = await fetch("http://localhost:5000/process", {
+    const response = await fetch("http://localhost:5001/process", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ inputText }),
@@ -26,6 +26,7 @@ const AutomationApp = () => {
   }
   setLoading(false);
 };
+
 
 
   return (
