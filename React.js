@@ -11,13 +11,22 @@ const AutomationApp = () => {
   const [loading, setLoading] = useState(false);
 
   const handleProcess = async () => {
-    setLoading(true);
-    // Simulate AI processing
-    setTimeout(() => {
-      setProcessedText(`Automated Output: ${inputText.toUpperCase()}`);
-      setLoading(false);
-    }, 2000);
-  };
+  setLoading(true);
+  try {
+    const response = await fetch("http://localhost:5000/process", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ inputText }),
+    });
+
+    const data = await response.json();
+    setProcessedText(data.processedText);
+  } catch (error) {
+    console.error("Error processing text:", error);
+  }
+  setLoading(false);
+};
+
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-gray-100">
