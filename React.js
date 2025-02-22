@@ -5,15 +5,10 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useEffect } from "react";
 
-const AutomationApp = () => {
-  const [inputText, setInputText] = useState("");
-  const [processedText, setProcessedText] = useState("");
-  const [loading, setLoading] = useState(false);
-
 const handleProcess = async () => {
   setLoading(true);
   try {
-    const response = await fetch("http://localhost:5001/process", {
+    const response = await fetch("http://localhost:5000/process", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ inputText }),
@@ -21,13 +16,25 @@ const handleProcess = async () => {
 
     const data = await response.json();
     setProcessedText(data.processedText);
+
+    // Fetch updated history
+    fetchHistory();
   } catch (error) {
     console.error("Error processing text:", error);
   }
   setLoading(false);
 };
 
-
+// Fetch history from the database
+const fetchHistory = async () => {
+  try {
+    const response = await fetch("http://localhost:5000/history");
+    const data = await response.json();
+    console.log("History:", data);
+  } catch (error) {
+    console.error("Error fetching history:", error);
+  }
+};
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-gray-100">
